@@ -5,7 +5,7 @@ export async function POST(request: NextRequest) {
     const { action, fileBase64, fileType, fileName, message, context, numQuestions } = await request.json();
     const apiKey = process.env.OPENROUTER_API_KEY;
     if (!apiKey) return NextResponse.json({ error: 'API key no configurada' }, { status: 500 });
-    const model = 'deepseek/deepseek-r1:free';
+    const model = 'qwen/qwen3-8b:free';
     let messages: any[] = [];
     let maxTokens = 4000;
     if (action === 'analyze') {
