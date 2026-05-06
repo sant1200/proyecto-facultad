@@ -1,7 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
-import { analyzeDocument, generateChatResponse, generateExam } from '@/lib/ai';
+import { useState, useRef, useEffect } from 'react';
 import { loadState, saveState, addSession, updateCurrentSession, addChatMessage, updateFlashcards, addExamResult, deleteSession } from '@/lib/storage';
 import { StudySession, Flashcard, ChatMessage, QuizQuestion, ExamResult } from '@/types';
 
@@ -86,7 +85,20 @@ export default function Home() {
       );
       
       setUploadProgress(30);
-      const result = await analyzeDocument(base64, file.type, file.name);
+      
+      const res = await fetch('/api/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'analyze',
+          fileBase64: base64,
+          fileType: file.type,
+          fileName: file.name
+        })
+      });
+      
+      if (!res.ok) throw new Error('Error en el análisis');
+      const result = await res.json();
       
       setUploadProgress(70);
       
@@ -94,17 +106,20 @@ export default function Home() {
         id: generateId(),
         documentName: file.name,
         createdAt: Date.now(),
-        summary: result.summary,
-        keyPoints: result.keyPoints,
-        flashcards: result.flashcards.map((f, i) => ({
+        summary: result.summary || 'No se pudo generar resumen',
+        keyPoints: result.keyPoints || [],
+        flashcards: (result.flashcards || []).map((f: any) => ({
           ...createEmptyFlashcard(),
           id: generateId(),
           question: f.question,
           answer: f.answer
         })),
-        quizQuestions: result.quizQuestions.map((q, i) => ({
+        quizQuestions: (result.quizQuestions || []).map((q: any) => ({
           id: generateId(),
-          ...q
+          question: q.question,
+          options: q.options,
+          correctAnswer: q.correctAnswer,
+          explanation: q.explanation
         })),
         chatHistory: []
       };
@@ -149,15 +164,26 @@ export default function Home() {
     setIsChatLoading(true);
     
     try {
-      const response = await generateChatResponse(chatInput, {
-        summary: currentSession.summary,
-        keyPoints: currentSession.keyPoints
+      const res = await fetch('/api/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'chat',
+          message: chatInput,
+          context: {
+            summary: currentSession.summary,
+            keyPoints: currentSession.keyPoints
+          }
+        })
       });
+      
+      if (!res.ok) throw new Error('Error en chat');
+      const data = await res.json();
       
       const assistantMsg: ChatMessage = {
         id: generateId(),
         role: 'assistant',
-        content: response,
+        content: data.content || data.choices?.[0]?.message?.content || 'No pude generar respuesta',
         timestamp: Date.now()
       };
       
@@ -193,18 +219,31 @@ export default function Home() {
     
     setIsUploading(true);
     try {
-      const result = await generateExam({
-        summary: currentSession.summary,
-        keyPoints: currentSession.keyPoints
-      }, 10);
+      const res = await fetch('/api/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'exam',
+          context: {
+            summary: currentSession.summary,
+            keyPoints: currentSession.keyPoints
+          },
+          numQuestions: 10
+        })
+      });
       
-      setExamQuestions(result.questions.map((q, i) => ({
+      if (!res.ok) throw new Error('Error generando examen');
+      const result = await res.json();
+      
+      const questions = (result.questions || []).map((q: any) => ({
         id: generateId(),
         question: q.question,
         options: q.options,
         correctAnswer: q.correctAnswer,
         explanation: q.explanation
-      })));
+      }));
+      
+      setExamQuestions(questions);
       setExamAnswers({});
       setShowExamResults(false);
       setMode('exam');
