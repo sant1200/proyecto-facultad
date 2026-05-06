@@ -1,36 +1,97 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# GenioFacultad 🧠
 
-## Getting Started
+Tu asistente de estudio con IA para convertirte en un genio de la facultad.
 
-First, run the development server:
+## Características
+
+- 📄 **Upload inteligente** - Sube PDFs, imágenes o documentos de texto
+- 🧠 **Análisis con IA** - Resúmenes, puntos clave, flashcards automáticas
+- 🎴 **Spaced Repetition** - Sistema de memorización efectivo
+- 💬 **Chat con Tutor IA** - Pregunta lo que quieras sobre el material
+- 📝 **Quiz interactivo** - Practica con preguntas generadas automáticamente
+- 🎯 **Simular Examen** - Exámenes con corrección automática y nota del 1 al 10
+
+## Tecnologías
+
+- Next.js 16 (App Router)
+- React 19 + TypeScript
+- TailwindCSS 4
+- OpenRouter API (Qwen 2.5 VL - gratuito)
+- localStorage para persistencia
+
+## Instrucciones de Desarrollo
+
+### Requisitos
+- Node.js 18+
+- npm o yarn
+
+### Instalación
 
 ```bash
+# Clonar el repositorio
+git clone https://github.com/sant1200/proyecto-facultad.git
+cd proyecto-facultad
+
+# Instalar dependencias
+npm install
+
+# Ejecutar en desarrollo
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Configurar API Key
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Crea un archivo `.env.local` en la raíz del proyecto:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```env
+OPENROUTER_API_KEY=tu-api-key-aqui
+```
 
-## Learn More
+Obtén tu API key gratuita en: https://openrouter.ai/settings/keys
 
-To learn more about Next.js, take a look at the following resources:
+### Build para producción
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm run build
+# Si hay errores de swc en Windows:
+npm run build -- --webpack
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Deploy en Vercel (1 clic)
 
-## Deploy on Vercel
+1. Ve a https://vercel.com
+2. Inicia sesión con GitHub
+3. Importa el repositorio `sant1200/proyecto-facultad`
+4. Añade las variables de entorno:
+   - `OPENROUTER_API_KEY` (tu API key)
+5. Deploy automático!
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Uso
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. **Sube un archivo** (PDF, imagen, txt)
+2. La IA analiza y genera contenido de estudio
+3. Estudia con resumen, flashcards o quiz
+4. Chatea con el tutor IA para dudas
+5. Simula exámenes para practicar
+
+## Estructura del Proyecto
+
+```
+proyecto-facultad/
+├── src/
+│   ├── app/
+│   │   ├── page.tsx       # App principal
+│   │   ├── layout.tsx     # Layout
+│   │   └── globals.css    # Estilos
+│   ├── lib/
+│   │   ├── ai.ts          # Funciones de IA
+│   │   └── storage.ts     # Persistencia
+│   └── types/
+│       └── index.ts       # Tipos TypeScript
+├── .env.local             # Variables de entorno
+└── package.json
+```
+
+## License
+
+MIT
