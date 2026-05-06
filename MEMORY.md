@@ -3,14 +3,15 @@
 ## Estado Actual del Proyecto
 
 **Última actualización:** Mayo 2026
-**Estado:** FUNCIONAL - En desarrollo
+**Estado:** ✅ COMPLETADO - Listo para deploy
 
 ### Estado Ejecutivo
-- Proyecto Next.js 16 (React 19) funcionando en modo dev
+- Proyecto Next.js 16 (React 19) funcionando
 - UI dark mode con glassmorphism implementada
 - IA integrada con OpenRouter (Qwen 2.5 VL)
 - Persistencia local con localStorage activa
-- Build local tiene problemas de compatibilidad con swc en Windows (usar --webpack)
+- GitHub repository creado: **sant1200/proyecto-facultad**
+- Listo para deploy en Vercel
 
 ---
 
@@ -73,17 +74,27 @@ proyecto-facultad/
 - [x] Cargar estado al iniciar
 - [x] Eliminar sesiones
 
-### Fase 4: known Issues
-- [x] Build local con error swc en Windows → usar `npm run build -- --webpack`
-- [x] Dev server funciona correctamente
+### Fase 4: GitHub + Deploy
+- [x] Crear repositorio GitHub: sant1200/proyecto-facultad
+- [x] Push de código a GitHub
+- [x] README.md con instrucciones de deploy
+- [ ] Deploy a Vercel (requiere conectar manualmente)
 
 ---
 
 ## Tareas Pendientes
 
 ### Alta Prioridad
-1. **Deploy a Vercel** - Crear repo GitHub y hacer deploy
-2. **GitHub Repository** - Necesita token del usuario para crear repo automáticamente
+1. ~~Deploy a Vercel~~ - El usuario debe conectar desde el dashboard de Vercel
+
+### Media Prioridad
+1. **Mejora UI** - Animaciones más suaves, loader mejorado
+2. **Errores mejorados** - Mejor manejo de errores de API
+3. **Gemini como alternativa** - Implementar fallback a Gemini si OpenRouter falla
+
+### Baja Prioridad
+1. **Supabase** - Integrar si se quiere persistencia en la nube
+2. **Estadísticas** - Dashboard de progreso más elaborado
 
 ### Media Prioridad
 1. **Mejora UI** - Animaciones más suaves, loader mejorado
@@ -115,9 +126,12 @@ npm run dev  # o npx next dev --webpack
 npm run build -- --webpack
 ```
 
-### Para conectar a GitHub:
-- Necesita token de GitHub del usuario para crear repo automáticamente
-- Alternativa: crear repo manualmente en GitHub y conectar
+### Para deploy en Vercel:
+1. Ir a https://vercel.com
+2. Iniciar sesión con GitHub
+3. Importar repositorio `sant1200/proyecto-facultad`
+4. Agregar variable de entorno: `OPENROUTER_API_KEY`
+5. Click en Deploy
 
 ### Notas importantes:
 - La API key de OpenRouter está en .env.local
@@ -129,9 +143,12 @@ npm run build -- --webpack
 ## Estado del Git
 
 ```
-On branch main
-Cambios pendientes en proyecto-facultad/src/
-Archivos no rastreados: proyecto-facultad/
+✅ Repo: https://github.com/sant1200/proyecto-facultad
+✅ Commits subidos: 2 (Initial commit + README/MEMORY/AGENTS)
+✅ Rama: main
 ```
 
-El código NO ha sido hecho commit ni pusheado a GitHub aún.
+## Links Importantes
+
+- **GitHub Repo:** https://github.com/sant1200/proyecto-facultad
+- **Vercel Deploy:** https://vercel.com/new → Importar `sant1200/proyecto-facultad`
