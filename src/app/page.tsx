@@ -51,6 +51,8 @@ export default function Home() {
   const [generatedQuiz, setGeneratedQuiz] = useState<QuizQuestion[]>([]);
   const [showUserQuiz, setShowUserQuiz] = useState(false);
 
+  const [isHydrated, setIsHydrated] = useState(false);
+
   useEffect(() => {
     const state = loadState();
     // Usamos un pequeño delay para evitar advertencias de cascading renders en React 19
@@ -59,6 +61,7 @@ export default function Home() {
       if (state.currentSession) setCurrentSession(state.currentSession);
       if (state.examResults.length > 0) setExamResults(state.examResults);
       setNow(Date.now());
+      setIsHydrated(true);
     }, 0);
     return () => clearTimeout(timer);
   }, []);
@@ -359,6 +362,12 @@ export default function Home() {
   const dueCards = now > 0 
     ? (currentSession?.flashcards.filter(c => c.nextReview <= now) || [])
     : [];
+
+  if (!isHydrated) {
+    return <div className="min-h-screen gradient-bg flex items-center justify-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-violet-500"></div>
+    </div>;
+  }
 
   return (
     <div className="min-h-screen gradient-bg">

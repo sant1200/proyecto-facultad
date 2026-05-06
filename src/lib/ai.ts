@@ -1,6 +1,10 @@
 import { AIAnalysisResponse } from '@/types';
 
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
+const getApiKey = () => {
+  const key = process.env.OPENROUTER_API_KEY;
+  if (!key) throw new Error('OPENROUTER_API_KEY no configurada. Verifica las variables de entorno.');
+  return key;
+};
 
 export async function analyzeDocument(
   fileBase64: string,
@@ -57,7 +61,7 @@ Responde en JSON exactamente así:
   const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+      'Authorization': `Bearer ${getApiKey()}`,
       'Content-Type': 'application/json',
       'HTTP-Referer': 'https://genio-facultad.vercel.app',
       'X-Title': 'GenioFacultad'
@@ -98,7 +102,7 @@ export async function generateChatResponse(
   const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+      'Authorization': `Bearer ${getApiKey()}`,
       'Content-Type': 'application/json',
       'HTTP-Referer': 'https://genio-facultad.vercel.app',
       'X-Title': 'GenioFacultad'
@@ -140,7 +144,7 @@ export async function generateExam(
   const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+      'Authorization': `Bearer ${getApiKey()}`,
       'Content-Type': 'application/json',
       'HTTP-Referer': 'https://genio-facultad.vercel.app',
       'X-Title': 'GenioFacultad'

@@ -3,6 +3,12 @@ import { analyzeDocument, generateChatResponse, generateExam } from '@/lib/ai';
 
 export async function POST(request: NextRequest) {
   try {
+    if (!process.env.OPENROUTER_API_KEY) {
+      return NextResponse.json({ 
+        error: 'OPENROUTER_API_KEY no encontrada. Configúrala en el dashboard de Vercel.' 
+      }, { status: 500 });
+    }
+
     const { action, fileBase64, fileType, fileName, message, context, numQuestions } = await request.json();
     
     if (action === 'analyze') {
