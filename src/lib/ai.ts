@@ -11,7 +11,7 @@ export async function analyzeDocument(
   fileType: string,
   fileName: string
 ): Promise<AIAnalysisResponse> {
-  const model = 'qwen/qwen2.5-vl-72b-instruct:free';
+  const model = 'google/gemini-2.5-flash';
   
   const isImage = fileType.startsWith('image/') || fileType === 'application/pdf';
   const mimeType = fileType === 'application/pdf' ? 'application/pdf' : fileType;
@@ -58,6 +58,7 @@ Responde en JSON exactamente así:
         }
       ];
 
+  console.log(`[AI] Llamando a OpenRouter con modelo: ${model}`);
   const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
     method: 'POST',
     headers: {
@@ -70,19 +71,23 @@ Responde en JSON exactamente así:
       model,
       messages: [{ role: 'user', content }],
       response_format: { type: 'json_object' },
-      max_tokens: 8000
+      max_tokens: 4000 // Reducido para mayor estabilidad
     })
   });
 
+  console.log(`[AI] Status: ${response.status}`);
   if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`Error de API: ${error}`);
+    const errorText = await response.text();
+    console.error(`[AI] Error de OpenRouter: ${errorText}`);
+    throw new Error(`Error de API: ${response.status}`);
   }
 
-  const data = await response.json();
-  const contentStr = data.choices?.[0]?.message?.content || '{}';
+  const rawData = await response.text();
+  console.log(`[AI] Respuesta recibida (primeros 100 caracteres): ${rawData.substring(0, 100)}`);
   
   try {
+    const data = JSON.parse(rawData);
+    const contentStr = data.choices?.[0]?.message?.content || '{}';
     const parsed = JSON.parse(contentStr);
     return {
       summary: parsed.summary || 'No se pudo generar resumen',
@@ -90,8 +95,9 @@ Responde en JSON exactamente así:
       flashcards: parsed.flashcards || [],
       quizQuestions: parsed.quizQuestions || []
     };
-  } catch {
-    throw new Error('Error al parsear respuesta de IA');
+  } catch (err) {
+    console.error('[AI] Error parseando JSON:', err);
+    throw new Error('Error al procesar la respuesta de la IA');
   }
 }
 
@@ -108,7 +114,7 @@ export async function generateChatResponse(
       'X-Title': 'GenioFacultad'
     },
     body: JSON.stringify({
-      model: 'qwen/qwen2.5-vl-72b-instruct:free',
+      model: 'google/gemini-2.5-flash',
       messages: [
         {
           role: 'system',
@@ -150,7 +156,7 @@ export async function generateExam(
       'X-Title': 'GenioFacultad'
     },
     body: JSON.stringify({
-      model: 'qwen/qwen2.5-vl-72b-instruct:free',
+      model: 'google/gemini-2.5-flash',
       messages: [
         {
           role: 'system',
