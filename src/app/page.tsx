@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { loadState, saveState, addSession, updateCurrentSession, addChatMessage, updateFlashcards, addExamResult, deleteSession } from '@/lib/storage';
+import { loadState, saveState, addSession, updateCurrentSession, updateFlashcards, addExamResult, deleteSession } from '@/lib/storage';
 import { StudySession, Flashcard, ChatMessage, QuizQuestion, ExamResult } from '@/types';
 
 type Mode = 'home' | 'upload' | 'study' | 'exam' | 'chat';
@@ -26,6 +26,7 @@ export default function Home() {
   const [sessions, setSessions] = useState<StudySession[]>([]);
   const [currentSession, setCurrentSession] = useState<StudySession | null>(null);
   const [examResults, setExamResults] = useState<ExamResult[]>([]);
+  const [now, setNow] = useState(0);
   
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -52,9 +53,14 @@ export default function Home() {
 
   useEffect(() => {
     const state = loadState();
-    setSessions(state.sessions);
-    setCurrentSession(state.currentSession);
-    setExamResults(state.examResults);
+    // Usamos un pequeño delay para evitar advertencias de cascading renders en React 19
+    const timer = setTimeout(() => {
+      if (state.sessions.length > 0) setSessions(state.sessions);
+      if (state.currentSession) setCurrentSession(state.currentSession);
+      if (state.examResults.length > 0) setExamResults(state.examResults);
+      setNow(Date.now());
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
@@ -108,13 +114,13 @@ export default function Home() {
         createdAt: Date.now(),
         summary: result.summary || 'No se pudo generar resumen',
         keyPoints: result.keyPoints || [],
-        flashcards: (result.flashcards || []).map((f: any) => ({
+        flashcards: (result.flashcards || []).map((f: { question: string; answer: string }) => ({
           ...createEmptyFlashcard(),
           id: generateId(),
           question: f.question,
           answer: f.answer
         })),
-        quizQuestions: (result.quizQuestions || []).map((q: any) => ({
+        quizQuestions: (result.quizQuestions || []).map((q: { question: string; options: string[]; correctAnswer: number; explanation?: string }) => ({
           id: generateId(),
           question: q.question,
           options: q.options,
@@ -235,7 +241,7 @@ export default function Home() {
       if (!res.ok) throw new Error('Error generando examen');
       const result = await res.json();
       
-      const questions = (result.questions || []).map((q: any) => ({
+      const questions = (result.questions || []).map((q: { question: string; options: string[]; correctAnswer: number; explanation?: string }) => ({
         id: generateId(),
         question: q.question,
         options: q.options,
@@ -348,7 +354,11 @@ export default function Home() {
     setFile(null);
   };
 
-  const dueCards = currentSession?.flashcards.filter(c => c.nextReview <= Date.now()) || [];
+
+
+  const dueCards = now > 0 
+    ? (currentSession?.flashcards.filter(c => c.nextReview <= now) || [])
+    : [];
 
   return (
     <div className="min-h-screen gradient-bg">

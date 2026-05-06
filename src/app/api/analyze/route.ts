@@ -1,48 +1,39 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { analyzeDocument, generateChatResponse, generateExam } from '@/lib/ai';
 
 export async function POST(request: NextRequest) {
   try {
     const { action, fileBase64, fileType, fileName, message, context, numQuestions } = await request.json();
-    const apiKey = process.env.OPENROUTER_API_KEY;
-    if (!apiKey) return NextResponse.json({ error: 'API key no configurada' }, { status: 500 });
-    const model = 'meta-llama/llama-3.2-3b-instruct:free';
-    let messages: any[] = [];
-    let maxTokens = 4000;
+    
     if (action === 'analyze') {
-      const prompt = `Analiza este documento y devuelve JSON con: summary (resumen breve), keyPoints (array de 5 puntos clave), flashcards (array de 5 objetos con question y answer), quizQuestions (array de 5 preguntas con question, options array, correctAnswer, explanation). JSON limpio sin texto extra.`;
-      const isImage = fileType.startsWith('image/') || fileType === 'application/pdf';
-      const mimeType = fileType === 'application/pdf' ? 'application/pdf' : fileType;
-      const content = isImage
-        ? [{ type: 'image_url', image_url: { url: `data:${mimeType};base64,${fileBase64}` } }, { type: 'text', text: prompt }]
-        : [{ type: 'text', text: `${prompt}\n\nContenido: ${fileName}` }];
-      messages = [{ role: 'user', content }];
-      maxTokens = 4000;
-    } else if (action === 'chat') {
-      messages = [{ role: 'system', content: `Tutor. Resumen: ${context.summary}. Puntos: ${context.keyPoints.join(', ')}` }, { role: 'user', content: message }];
-      maxTokens = 2000;
-    } else if (action === 'exam') {
-      messages = [{ role: 'system', content: 'Crea examenes' }, { role: 'user', content: `Genera ${numQuestions} preguntas. JSON.` }];
-      maxTokens = 4000;
+      if (!fileBase64 || !fileType || !fileName) {
+        return NextResponse.json({ error: 'Faltan datos del archivo' }, { status: 400 });
+      }
+      const result = await analyzeDocument(fileBase64, fileType, fileName);
+      return NextResponse.json(result);
+    } 
+    
+    if (action === 'chat') {
+      if (!message || !context) {
+        return NextResponse.json({ error: 'Faltan datos para el chat' }, { status: 400 });
+      }
+      const content = await generateChatResponse(message, context);
+      return NextResponse.json({ content });
+    } 
+    
+    if (action === 'exam') {
+      if (!context) {
+        return NextResponse.json({ error: 'Falta contexto para el examen' }, { status: 400 });
+      }
+      const result = await generateExam(context, numQuestions || 10);
+      return NextResponse.json(result);
     }
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json', 'HTTP-Referer': 'https://genio-facultad.vercel.app', 'X-Title': 'GenioFacultad' },
-      body: JSON.stringify({ model, messages, response_format: { type: 'json_object' }, max_tokens: maxTokens })
-    });
-    if (!response.ok) {
-      const errText = await response.text();
-      console.error('OpenRouter error:', response.status, errText);
-      return NextResponse.json({ error: `Error API (${response.status}): ${errText}` }, { status: 500 });
-    }
-    const data = await response.json();
-    console.log('OpenRouter response:', JSON.stringify(data).substring(0, 200));
-    const contentStr = data.choices?.[0]?.message?.content || '{}';
-    try { return NextResponse.json(JSON.parse(contentStr)); } catch { 
-      console.error('Parse error, content was:', contentStr.substring(0, 200));
-      return NextResponse.json({ error: 'Error al parsear respuesta' }, { status: 500 }); 
-    }
-  } catch (error: any) { 
-    console.error('Server error:', error);
-    return NextResponse.json({ error: `Error: ${error.message || 'Error desconocido'}` }, { status: 500 }); 
+
+    return NextResponse.json({ error: 'Acción no válida' }, { status: 400 });
+  } catch (error: unknown) {
+    console.error('API Route Error:', error);
+    return NextResponse.json({ 
+      error: error instanceof Error ? error.message : 'Error interno del servidor' 
+    }, { status: 500 });
   }
 }
