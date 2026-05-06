@@ -977,13 +977,13 @@ export default function Home() {
         )}
 
         {mode === 'chat' && currentSession && (
-          <div className="glass rounded-2xl h-[calc(100vh-200px)] flex flex-col border border-white/5">
-            <div className="p-5 border-b border-white/10">
-              <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                <span className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></span>
+          <div className="chat-container glass-card animate-fade-in">
+            <div className="p-5 border-b border-purple-500/20">
+              <h2 className="text-lg font-bold text-white flex items-center gap-2 font-display">
+                <span className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></span>
                 Chat con tu Tutor IA
               </h2>
-              <p className="text-zinc-500 text-sm mt-1">Pregunta lo que quieras sobre el material</p>
+              <p className="text-zinc-400 text-sm mt-1">Pregunta lo que quieras sobre el material</p>
             </div>
             
             <div className="flex-1 overflow-y-auto p-5 space-y-4">
@@ -999,10 +999,10 @@ export default function Home() {
               ) : (
                 currentSession.chatHistory.map(msg => (
                   <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`max-w-[80%] p-4 rounded-2xl ${
+                    <div className={`message-bubble ${
                       msg.role === 'user'
-                        ? 'bg-gradient-to-r from-cyan-500 to-cyan-600 text-black font-medium'
-                        : 'bg-white/10 text-zinc-200'
+                        ? 'message-user'
+                        : 'message-assistant'
                     }`}>
                       <p className="whitespace-pre-wrap">{msg.content}</p>
                     </div>
@@ -1011,11 +1011,11 @@ export default function Home() {
               )}
               {isChatLoading && (
                 <div className="flex justify-start">
-                  <div className="bg-white/10 p-4 rounded-2xl">
-                    <div className="flex gap-2">
-                      <span className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce"></span>
-                      <span className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></span>
-                      <span className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></span>
+                  <div className="message-assistant">
+                    <div className="typing-indicator">
+                      <span></span>
+                      <span></span>
+                      <span></span>
                     </div>
                   </div>
                 </div>
@@ -1023,21 +1023,21 @@ export default function Home() {
               <div ref={chatEndRef} />
             </div>
             
-            <div className="p-5 border-t border-white/10">
-              <div className="flex gap-3">
+            <div className="p-5 border-t border-purple-500/20">
+              <div className="input-container flex gap-3">
                 <input
                   type="text"
                   value={chatInput}
                   onChange={(e) => setChatInput(e.target.value)}
                   placeholder="Escribe tu pregunta..."
-                  className="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-zinc-500 input-focus"
+                  className="flex-1 bg-transparent text-white placeholder-zinc-500 outline-none"
                   onKeyDown={(e) => e.key === 'Enter' && handleSendChat()}
                   disabled={isChatLoading}
                 />
                 <button
                   onClick={handleSendChat}
                   disabled={isChatLoading || !chatInput.trim()}
-                  className="px-5 py-3 bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-400 hover:to-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl font-medium transition-all text-black"
+                  className="px-5 py-3 bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-500 hover:to-violet-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-full font-medium transition-all purple-glow-subtle"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
