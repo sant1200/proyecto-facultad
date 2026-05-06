@@ -5,7 +5,7 @@ export async function POST(request: NextRequest) {
     const { action, fileBase64, fileType, fileName, message, context, numQuestions } = await request.json();
     const apiKey = process.env.OPENROUTER_API_KEY;
     if (!apiKey) return NextResponse.json({ error: 'API key no configurada' }, { status: 500 });
-    const model = 'qwen/qwen3-8b:free';
+    const model = 'meta-llama/llama-3.2-3b-instruct:free';
     let messages: any[] = [];
     let maxTokens = 4000;
     if (action === 'analyze') {
